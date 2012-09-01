@@ -1,0 +1,14 @@
+{  
+  "version": "0.1",  
+  "name": "Run Little Boy, Run,  
+  "description": "A run to live, HTML5 2D canvas game.",
+  "launch_path": "/WebGameStub/",
+  "icons": {  
+    "128": "bg.png"  
+  },  
+  "developer": {  
+    "name": "Gabriel Molter",  
+    "url": "http://www.gabrielmolter.com.br"  
+  },  
+  "installs_allowed_from": ["*"]
+}  
