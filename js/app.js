@@ -1,6 +1,6 @@
-// Setup requestAnimationFrame
+	// Setup requestAnimationFrame
 requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||  
-                        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+						window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
 // Create the canvasElement
 var canvasElement = document.createElement("canvas");
@@ -11,6 +11,7 @@ document.body.appendChild(canvasElement);
 
 // Background image
 var isBackgroundReady = false;
+
 var bgImage = new Image();
 bgImage.onload = function () {
 	isBackgroundReady = true;
@@ -26,10 +27,10 @@ heroImage.onload = function () {
 heroImage.src = "img/hero.png";
 
 // Monster image
-var monsterReady = false;
+var isMonsterReady = false;
 var monsterImage = new Image();
 monsterImage.onload = function () {
-	monsterReady = true;
+	isMonsterReady = true;
 };
 monsterImage.src = "img/monster.png";
 
@@ -53,6 +54,15 @@ addEventListener("keyup", function (e) {
 	delete pressedKeys[e.keyCode];
 }, false);
 
+document.getElementById('stop').addEventListener('click', function() {
+	 document.getElementById('stop').style.display = 'none';
+	 isGameRuning = true;
+	 runGame();
+}, false);
+
+
+
+
 // reset the game when the player catches a monster
 var resetGame = function () {	
 	isGameRuning = false;
@@ -65,12 +75,56 @@ var resetGame = function () {
 	monster.y = 32 + (Math.random() * (canvasElement.height - 64));
 };
 
+var moveHero = function(intMovementModificator) {
+	if (38 in pressedKeys) { // Player holding up
+		if(hero.y > 30 ){
+			hero.y -= hero.speed * intMovementModificator;
+		}
+		return;
+	}
+
+	if (40 in pressedKeys) { // Player holding down
+		if(hero.y < 420 ){
+			hero.y += hero.speed * intMovementModificator;
+		}
+		return;
+	}
+	
+	if (37 in pressedKeys) { // Player holding left
+		if(hero.x > 30){
+			hero.x -= hero.speed * intMovementModificator;
+		}
+		return;
+	}
+	if (39 in pressedKeys) { // Player holding right
+		if(hero.x < 450 ){
+			hero.x += hero.speed * intMovementModificator;
+		}
+		return;
+	}
+};
+
+var moveMonster = function(intMovementModificator) {
+	if(hero.x > monster.x) {
+		monster.x += monster.speed * intMovementModificator;
+	}else {
+		monster.x -= monster.speed * intMovementModificator;
+	}
+
+	if(hero.y > monster.y) {
+		monster.y += monster.speed * intMovementModificator;
+	}else {
+		monster.y -= monster.speed * intMovementModificator;
+	}
+};
+
+
 // Update game objects
-var updateGameObjects = function (modifier) {
+var updateGameObjects = function (intMovementModificator) {
 	var isHeroAlive = true;
 	
-	moveHero(modifier);
-	moveMonster(modifier);
+	moveHero(intMovementModificator);
+	moveMonster(intMovementModificator);
 
 	// Are they touching?
 	if (
@@ -86,52 +140,10 @@ var updateGameObjects = function (modifier) {
 	return isHeroAlive;
 };
 
-var movehero = function(modifier) {
-	if (38 in pressedKeys) { // Player holding up
-		if(hero.y < 30 ){
-			return;
-		}else{
-			hero.y -= hero.speed * modifier;
-	}
 
-	if (40 in pressedKeys) { // Player holding down
-		if(hero.y > 420 ){
-			return;	
-		}else{
-			hero.y += hero.speed * modifier;
-		}		
-	}
-	
-	if (37 in pressedKeys) { // Player holding left
-		if(hero.x < 30){
-			return;
-		}else{
-			hero.x -= hero.speed * modifier;
-		}
-	}
-	if (39 in pressedKeys) { // Player holding right
-		if(hero.x > 450 ){
-			return;
-		}else{
-			hero.x += hero.speed * modifier;
-		}
-	}
-};
-var moveMonster = function(modifier) {
-	if(hero.x > monster.x) {
-		monster.x += monster.speed * modifier;
-	}else {
-		monster.x -= monster.speed * modifier;
-	}
 
-	if(hero.y > monster.y) {
-		monster.y += monster.speed * modifier;
-	}else {
-		monster.y -= monster.speed * modifier;
-	}
-};
 // Draw everything
-var render = function () {
+var renderObjects = function () {
 	if (isBackgroundReady) {
 		canvasContext.drawImage(bgImage, 0, 0);
 	}
@@ -140,7 +152,7 @@ var render = function () {
 		canvasContext.drawImage(heroImage, hero.x, hero.y);
 	}
 
-	if (monsterReady) {
+	if (isMonsterReady) {
 		canvasContext.drawImage(monsterImage, monster.x, monster.y);
 	}
 
@@ -152,29 +164,23 @@ var render = function () {
 	canvasContext.fillText("Deaths: " + monstersCaught, 32, 32);
 };
 
-document.getElementById('stop').addEventListener('click', function() {
-	 document.getElementById('stop').style.display = 'none';
-	 isGameRuning = true;
-	 main();
-}, false);
 
 // The main game loop
-var main = function () {	
+var runGame = function () {	
 	var endedTimestamp = Date.now();
 	var timeDiference = endedTimestamp - startedTimestamp;
 	if(isGameRuning) {
 		updateGameObjects(timeDiference / 1000);
 	}
-	render();
+	renderObjects();
 
 	startedTimestamp = endedTimestamp;
-	requestAnimationFrame(main);
+	requestAnimationFrame(runGame);
 };
 
 // Let's play this game!
 var isGameRuning = false;
-
 resetGame();
 var startedTimestamp = Date.now();
-main();
+runGame();
 document.getElementById('stop').style.display = 'block';
